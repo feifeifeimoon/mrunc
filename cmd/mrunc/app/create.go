@@ -9,7 +9,7 @@ func NewCreateCommand() *cobra.Command {
 	return &cobra.Command{
 		Use:     "create <container-id> <path-to-bundle>",
 		Long:    "create a container by id and bundle path",
-		Example: "create ae86 ",
+		Example: "mrunc create busybox-1 bundle",
 		Args:    cobra.MinimumNArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			id, bundle := args[0], args[1]
