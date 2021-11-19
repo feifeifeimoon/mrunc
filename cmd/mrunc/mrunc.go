@@ -12,6 +12,7 @@ func main() {
 		Long: "mrunc is a container runtime implementation，comply with OCI specifications",
 	}
 	rootCmd.AddCommand(app.NewCreateCommand())
+	rootCmd.AddCommand(app.NewVersionCommand())
 
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Println("execute err", err)
