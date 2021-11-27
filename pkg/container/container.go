@@ -25,7 +25,6 @@ func NewContainer(id, bundleDir string) (*Container, error) {
 	}
 
 	container.Spec = spec
-	log.Info("")
 
 	initProcess := process.NewInitProcess()
 	initProcess.Create(spec)
