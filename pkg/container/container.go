@@ -1,10 +1,12 @@
 package container
 
 import (
+	"encoding/json"
 	"github.com/feifeifeimoon/mrunc/pkg/process"
 	"github.com/feifeifeimoon/mrunc/pkg/util"
 	"github.com/opencontainers/runtime-spec/specs-go"
 	log "github.com/sirupsen/logrus"
+	"os"
 )
 
 type Container struct {
@@ -15,7 +17,6 @@ type Container struct {
 
 func NewContainer(id, bundleDir string) (*Container, error) {
 	log.Infof("new container [%s] [%s]", id, bundleDir)
-
 	var container Container
 
 	spec, err := util.ReadSpecFromBundle(bundleDir)
@@ -26,8 +27,19 @@ func NewContainer(id, bundleDir string) (*Container, error) {
 
 	container.Spec = spec
 
+	pr, pw, err := os.Pipe()
+	if err != nil {
+		log.Errorf("create pipe err, %v", err)
+		return nil, err
+	}
+
 	initProcess := process.NewInitProcess()
-	initProcess.Create(spec)
+	initProcess.Create(spec, pr)
+
+	if err := json.NewEncoder(pw).Encode(spec); err != nil {
+		log.Errorf("write spec to init pipe err, %v", err)
+		return nil, err
+	}
 
 	return &container, nil
 }

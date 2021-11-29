@@ -4,11 +4,13 @@ package process
 
 import (
 	"context"
+	"encoding/json"
 	"github.com/opencontainers/runtime-spec/specs-go"
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/sys/unix"
 	"os"
 	"os/exec"
+	"strconv"
 	"syscall"
 )
 
@@ -25,7 +27,7 @@ func NewInitProcess() *InitProcess {
 	}
 }
 
-func (i *InitProcess) Create(spec *specs.Spec) {
+func (i *InitProcess) Create(spec *specs.Spec, pw *os.File) {
 	cmd := exec.CommandContext(context.Background(), i.InitPath, i.InitArgs...)
 
 	//case ns to unix flag
@@ -56,6 +58,10 @@ func (i *InitProcess) Create(spec *specs.Spec) {
 		Cloneflags: flag,
 	}
 
+	cmd.ExtraFiles = append(cmd.ExtraFiles, pw)
+	// 3代表stdin、stdout、stderr占用了三个
+	cmd.Env = append(cmd.Env, "INIT_PIPE_PD="+strconv.Itoa(3+len(cmd.ExtraFiles)-1))
+
 	cmd.Stdout, cmd.Stderr = os.Stdout, os.Stderr
 
 	if err := cmd.Start(); err != nil {
@@ -63,15 +69,39 @@ func (i *InitProcess) Create(spec *specs.Spec) {
 		return
 	}
 
-	if err := cmd.Wait(); err != nil {
-		log.Errorf("wait process err %v", err)
-		return
-	}
+	//if err := cmd.Wait(); err != nil {
+	//	log.Errorf("wait process err %v", err)
+	//	return
+	//}
 
 	//defer func() {
 	//	if err != nil {
 	//		_ = cmd.Process.Kill()
 	//	}
 	//}()
+
+}
+
+func (i *InitProcess) StartInitialization() error {
+	pipeFd, err := strconv.Atoi(os.Getenv("INIT_PIPE_PD"))
+	if err != nil {
+		//panic(err)
+		return err
+	}
+	log.Info("get init pipe fd ", pipeFd)
+
+	pipe := os.NewFile(uintptr(pipeFd), "pipe")
+	defer pipe.Close()
+
+	var spec *specs.Spec
+	if err := json.NewDecoder(pipe).Decode(&spec); err != nil {
+		log.Errorf("read spec from init pipe err, %v", err)
+		return err
+	}
+
+	log.Debugf("read spec %+v", spec)
+
+	// no return
+	return nil
 
 }
