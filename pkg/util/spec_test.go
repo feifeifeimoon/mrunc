@@ -12,7 +12,7 @@ func TestReadSpecFromBundle(t *testing.T) {
 	for i := 0; i < 1000; i++ {
 		_, err := ReadSpecFromBundle("../../bin")
 		if err != nil {
-			t.Errorf("read spec from bundle err")
+			t.Errorf("read spec from bundle err: %v", err)
 		}
 	}
 

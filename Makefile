@@ -11,7 +11,7 @@ GIT_VERSION := $(shell git rev-parse --abbrev-ref HEAD)
 GIT_COMMIT := $(shell git rev-parse HEAD)
 
 # go param
-GO_BUILD_PACKAGE = ${GO_PACKAGE}/cmd/...
+GO_BUILD_PACKAGE = ${GO_PACKAGE}/...
 CGO_ENABLED = 0
 
 GO_BUILD_ARGS = -gcflags "all=-N -l" -ldflags "\

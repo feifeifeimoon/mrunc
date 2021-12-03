@@ -36,10 +36,15 @@ func NewContainer(id, bundleDir string) (*Container, error) {
 	initProcess := process.NewInitProcess()
 	initProcess.Create(spec, pr)
 
+	// 将spc通过pipe发送给init进程
 	if err := json.NewEncoder(pw).Encode(spec); err != nil {
 		log.Errorf("write spec to init pipe err, %v", err)
 		return nil, err
 	}
+
+	// 记录init进程的Pid
+
+	// 为init进程设置cgroup
 
 	return &container, nil
 }

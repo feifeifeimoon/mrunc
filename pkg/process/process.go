@@ -100,6 +100,15 @@ func (i *InitProcess) StartInitialization() error {
 	}
 
 	log.Debugf("read spec %+v", spec)
+	// 切换工作目录 到bundle目录下
+
+	// 初始化默认的设备
+
+	// 如果spec中指定了工作目录 进行切换
+
+	// 准备环境变量
+
+	// 查找 准备运行的进程的目录
 
 	// no return
 	return nil
